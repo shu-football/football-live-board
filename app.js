@@ -310,9 +310,11 @@ function updateModeUI() {
 
 function teamStats(groupCode) {
   const teams = groupCode === "A" ? state.groupATeams : state.groupBTeams;
+  if (!teams || teams.length === 0) return [];
   const map = Object.fromEntries(teams.map((t) => [t, { team: t, played: 0, win: 0, draw: 0, lose: 0, gf: 0, ga: 0, gd: 0, points: 0 }]));
   state.matches.filter((m) => m.group === groupCode && Array.isArray(m.score)).forEach((m) => {
     const [h, a] = m.score; const home = map[m.home]; const away = map[m.away];
+    if (!home || !away) return; // 跳过球队名单中不存在的队伍
     home.played += 1; away.played += 1; home.gf += h; home.ga += a; away.gf += a; away.ga += h;
     if (h > a) { home.win += 1; away.lose += 1; home.points += 3; }
     else if (h < a) { away.win += 1; home.lose += 1; away.points += 3; }
@@ -2248,7 +2250,13 @@ async function tryInitSupabase() {
     return;
   }
   try {
-    state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
+      }
+    });
     state.mode = "cloud";
     console.log("[DEBUG] Supabase client 创建成功, 开始 loadCloudData");
     await loadCloudData();
