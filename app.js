@@ -2033,7 +2033,25 @@ function bindEvents() {
     const email = document.querySelector("#adminEmail").value.trim();
     const password = document.querySelector("#adminPassword").value;
     console.log("[DEBUG] 开始登录:", email);
-    const { data, error } = await state.supabase.auth.signInWithPassword({ email, password });
+    // 直接用 REST API 登录，绕过 supabase-js 的兼容问题
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const authData = await res.json();
+    console.log("[DEBUG] auth API 返回:", res.status, authData.error || authData.access_token ? "token ok" : "unknown");
+    if (!res.ok) {
+      return alert(`登录失败：${authData.error_description || authData.msg || authData.error || "未知错误"}`);
+    }
+    await state.supabase.auth.setSession({
+      access_token: authData.access_token,
+      refresh_token: authData.refresh_token
+    });
+    console.log("[DEBUG] setSession 完成");
     console.log("[DEBUG] signIn结果 — error:", error, "session:", !!data?.session);
     if (error) return alert(`登录失败：${error.message}`);
     await refreshAuth();
