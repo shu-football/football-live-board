@@ -3,7 +3,7 @@
 上海大学足球协会赛事管理平台。支持多赛季管理、小组赛积分榜、射手榜、红黄牌榜、淘汰赛对阵图、球员库管理、公告自动解析、数据备份恢复，以及线上抽签。
 
 > **代码仓库**: https://github.com/shu-football/football-live-board  
-> **线上地址**: （Netlify 部署后填入）  
+> **线上地址**: https://sufafootball.netlify.app/  
 > **备份访问**: 直接双击 `index.html` 在浏览器中打开（本地模式）
 
 ## 功能概览
