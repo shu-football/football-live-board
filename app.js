@@ -2052,8 +2052,6 @@ function bindEvents() {
       refresh_token: authData.refresh_token
     });
     console.log("[DEBUG] setSession 完成");
-    console.log("[DEBUG] signIn结果 — error:", error, "session:", !!data?.session);
-    if (error) return alert(`登录失败：${error.message}`);
     await refreshAuth();
     console.log("[DEBUG] refreshAuth 完成, canEdit:", state.canEdit);
   });
