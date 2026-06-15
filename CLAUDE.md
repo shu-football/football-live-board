@@ -5,12 +5,20 @@
 ## 每次项目更新后必须更新本文件
 - 任何功能增删、架构调整、配置变更完成后，同步更新 CLAUDE.md 保持准确
 
+## 部署与协作
+
+- **代码仓库**: https://github.com/shu-football/football-live-board
+- **托管平台**: Netlify（通过 GitHub 自动部署）
+- **数据库**: Supabase（项目归属个人账号，通过 Team 功能添加协作者）
+- **部署流程**: 代码 push 到 GitHub main 分支 → Netlify 自动检测 → 自动上线
+- **Supabase**: 当前在王恩祈个人账号下，可邀请协作者（Settings → Team）或未来迁移到足协公用 Supabase 账号
+
 ## 项目结构
 
 ```
 D:\football-live-board\
 ├── index.html          # 主页面 (赛季选择/积分榜/射手榜/红黄牌/淘汰赛/球员库/赛季配置/赛果录入/公告解析/媒体画廊)
-├── app.js              # 核心逻辑 (2208行) 状态管理/渲染/Cloud同步/事件
+├── app.js              # 核心逻辑 状态管理/渲染/Cloud同步/事件
 ├── styles.css          # 所有样式 (含 ko-winner 蓝色高亮、bracket 三列布局、媒体画廊、响应式)
 ├── schedule-utils.js   # 赛程生成: splitGroups, generateRoundRobin, generateKnockoutBracket
 ├── player-pool.js      # 球员库: CRUD, Excel解析, 粘贴解析
@@ -21,6 +29,7 @@ D:\football-live-board\
 ├── ADMIN_GUIDE.md      # 管理员手册
 ├── README.md           # 项目说明
 ├── .cursor_context.md  # Cursor 上下文摘要 (技术决策/已知问题/待办)
+├── .gitignore          # Git 忽略规则
 └── assets/sufa-logo.png
 ```
 
@@ -65,6 +74,59 @@ D:\football-live-board\
 - `mustAdmin()`: 仅 owner/admin 通过，用于比分/射手/红黄牌/球员库/赛季配置等数据操作
 - `mustMediaEditor()`: owner/admin/media_editor 均通过，仅用于媒体上传和删除
 - `updateModeUI()`: `.admin-only` 仅 owner/admin 可见；`.media-editor-only` 所有角色可见
+
+## 协作者更新网站流程
+
+### 初次设置（新协作者只需做一次）
+
+```bash
+# 1. 装 Git: https://git-scm.com/download/win
+# 2. 克隆仓库到本地
+git clone https://github.com/shu-football/football-live-board.git
+cd football-live-board
+```
+
+### 日常更新流程
+
+```
+改代码 → git add/commit → git push → Netlify 自动部署（约1分钟生效）
+```
+
+```bash
+git add -A
+git commit -m "描述你改了什么"
+git push
+```
+
+### SUPABASE 管理
+
+当前 Supabase 项目在王恩祈个人账号下。有两种方式给别人权限：
+
+**方式 A — 添加团队成员（推荐，两者都做）**
+1. 打开 [supabase.com/dashboard](https://supabase.com/dashboard)，进项目
+2. Settings → Team → 输入对方邮箱 → 发送邀请
+3. 对方接受后即可管理数据库、查看 Authentication 用户
+
+**方式 B — 迁移到足协公用 Supabase 账号**
+1. 用足协邮箱注册新的 Supabase 账号
+2. 在 SQL Editor 中执行 `supabase-schema.sql` 建表
+3. 在 Authentication 中创建管理员用户
+4. 把 `app.js` 里的 `SUPABASE_URL` 和 `SUPABASE_ANON_KEY` 换成新项目的值
+
+### NETLIFY 管理
+
+Netlify 用 shu-football GitHub 账号登录，支持添加协作者：
+1. Site settings → Members → 添加 Collaborator
+2. Collaborator 可部署但不可删除站点
+
+### 各账号说明
+
+| 服务 | 账号 | 说明 |
+|------|------|------|
+| GitHub | shu-football | 存代码，push 触发自动部署 |
+| Netlify | 绑 GitHub shu-football | 静态托管，自动从 GitHub 部署 |
+| Supabase | 王恩祈个人账号 | 数据库+认证，通过 Team 加协作者 |
+| 网站 owner | w2564139064@163.com | 网站最高管理员 |
 
 ## 媒体画廊实现
 

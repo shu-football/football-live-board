@@ -2,6 +2,10 @@
 
 上海大学足球协会赛事管理平台。支持多赛季管理、小组赛积分榜、射手榜、红黄牌榜、淘汰赛对阵图、球员库管理、公告自动解析、数据备份恢复，以及线上抽签。
 
+> **代码仓库**: https://github.com/shu-football/football-live-board  
+> **线上地址**: （Netlify 部署后填入）  
+> **备份访问**: 直接双击 `index.html` 在浏览器中打开（本地模式）
+
 ## 功能概览
 
 | 模块 | 说明 |
@@ -65,19 +69,32 @@ const ADMIN_EMAILS = ["your@email.com"]; // 本地模式 fallback
 - 管理员登录后可编辑所有数据
 - 数据实时同步到云端
 
-### 方式三：部署到互联网
+### 方式三：部署到互联网（GitHub + Netlify 自动部署 ✅ 推荐）
 
-#### Netlify Drop（最简单）
+项目已托管在 GitHub，push 代码后 Netlify 自动部署。
+
+#### 初次设置
+
+1. 将项目推送到 GitHub 仓库
+2. 在 [Netlify](https://app.netlify.com) 用 GitHub 账号登录
+3. **Add new site → Import an existing project** → 选 GitHub 仓库
+4. 不用改任何设置，直接点 Deploy
+5. 之后每次 `git push` 到 main 分支，Netlify 自动更新
+
+#### 日常更新
+
+```bash
+git add -A
+git commit -m "描述改动"
+git push
+# 等 1-2 分钟，网站自动更新
+```
+
+#### Netlify Drop（备选，无需 Git）
 
 1. 访问 [app.netlify.com/drop](https://app.netlify.com/drop)
 2. 将整个项目文件夹拖入页面
 3. 获得一个公开 URL
-
-#### GitHub Pages / Vercel
-
-将项目推送到 GitHub 仓库，然后在 Vercel 或 GitHub Pages 中导入。
-
-> **注意**：部署到互联网后，请确保 `app.js` 中的 Supabase 连接配置正确，否则数据将只保存在本地。
 
 ## 新赛季搭建流程
 
@@ -173,6 +190,7 @@ football-live-board/
 ├── supabase-schema.sql # Supabase 数据库建表脚本
 ├── ADMIN_GUIDE.md      # 管理员操作手册（详细）
 ├── README.md           # 本文档
+├── .gitignore          # Git 忽略规则
 └── assets/
     └── sufa-logo.png   # 上海大学足球协会 Logo
 ```
