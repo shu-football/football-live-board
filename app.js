@@ -2032,7 +2032,6 @@ function bindEvents() {
     if (state.mode !== "cloud") return alert("请先配置 Supabase 才能启用管理员登录。");
     const email = document.querySelector("#adminEmail").value.trim();
     const password = document.querySelector("#adminPassword").value;
-    console.log("[DEBUG] 开始登录:", email);
     // 直接用 REST API 登录，绕过 supabase-js 的兼容问题
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: "POST",
@@ -2043,7 +2042,6 @@ function bindEvents() {
       body: JSON.stringify({ email, password })
     });
     const authData = await res.json();
-    console.log("[DEBUG] auth API 返回:", res.status, authData.error || authData.access_token ? "token ok" : "unknown");
     if (!res.ok) {
       return alert(`登录失败：${authData.error_description || authData.msg || authData.error || "未知错误"}`);
     }
@@ -2051,9 +2049,7 @@ function bindEvents() {
       access_token: authData.access_token,
       refresh_token: authData.refresh_token
     });
-    console.log("[DEBUG] setSession 完成");
     await refreshAuth();
-    console.log("[DEBUG] refreshAuth 完成, canEdit:", state.canEdit);
   });
 
   bindIfExists("#adminLogoutBtn", "click", async () => {
@@ -2219,10 +2215,8 @@ async function refreshAuth() {
     updateModeUI();
     return;
   }
-  console.log("[DEBUG] refreshAuth — 获取 session...");
   const { data } = await state.supabase.auth.getSession();
   const email = data?.session?.user?.email || "";
-  console.log("[DEBUG] refreshAuth — email:", email || "(未登录)");
   state.currentUserEmail = email;
   if (!email) {
     state.canEdit = false;
@@ -2234,14 +2228,12 @@ async function refreshAuth() {
 
   // 优先从云端管理员表判断；失败时回退前端白名单
   try {
-    console.log("[DEBUG] refreshAuth — 查询 admin_users...");
     const { data: adminRow, error } = await state.supabase
       .from("admin_users")
       .select("email,is_active,role")
       .eq("email", email)
       .eq("is_active", true)
       .maybeSingle();
-    console.log("[DEBUG] refreshAuth — adminRow:", adminRow, "error:", error);
     if (error) throw error;
     state.canEdit = !!adminRow;
     state.adminRole = adminRow?.role || "";
@@ -2249,7 +2241,7 @@ async function refreshAuth() {
     state.canManageAdmins = state.adminRole === "owner";
     if (state.canEdit) await loadAdminUsers();
   } catch (err) {
-    console.warn("[DEBUG] admin_users 查询失败，回退白名单:", err);
+    console.warn("admin_users check failed, fallback ADMIN_EMAILS:", err);
     state.canEdit = ADMIN_EMAILS.includes(email);
     state.adminRole = state.canEdit ? "owner" : "";
     state.canManageAdmins = state.canEdit;
@@ -2259,10 +2251,8 @@ async function refreshAuth() {
 }
 
 async function tryInitSupabase() {
-  console.log("[DEBUG] tryInitSupabase — URL:", SUPABASE_URL, "lib loaded:", !!window.supabase);
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !window.supabase) {
     state.mode = "local";
-    console.log("[DEBUG] 进入 local 模式（缺配置）");
     return;
   }
   try {
@@ -2274,12 +2264,10 @@ async function tryInitSupabase() {
       }
     });
     state.mode = "cloud";
-    console.log("[DEBUG] Supabase client 创建成功, 开始 loadCloudData");
     await loadCloudData();
-    console.log("[DEBUG] loadCloudData 完成, 开始 refreshAuth");
     await refreshAuth();
   } catch (e) {
-    console.warn("[DEBUG] tryInitSupabase 异常:", e);
+    console.warn(e);
     state.mode = "local";
   }
 }
