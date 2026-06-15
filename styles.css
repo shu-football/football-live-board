@@ -1,0 +1,780 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  background: linear-gradient(180deg, #f3f7ff 0%, #f8fafc 40%, #f1f5f9 100%);
+  color: #0f172a;
+}
+
+.page-header {
+  background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 65%, #2563eb 100%);
+  color: #fff;
+  padding: 24px 24px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.site-logo {
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.page-header p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 20px auto 30px;
+  padding: 0 16px;
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #dbe5f4;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+h2, h3 {
+  margin: 6px 0 12px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #e7edf7;
+  padding: 8px 8px;
+  text-align: center;
+}
+
+.data-table thead {
+  background: #e8efff;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f8fbff;
+}
+
+.data-table tbody tr:hover {
+  background: #eef5ff;
+}
+
+.match-list {
+  display: grid;
+  gap: 8px;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: 110px 80px 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+  padding: 8px;
+  background: #fbfdff;
+}
+
+.score-box {
+  width: 70px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 小组赛：前四晋级高亮 */
+tr.qualify {
+  box-shadow: inset 4px 0 0 rgba(15, 23, 42, 0.35);
+}
+tr.qualify-1 {
+  background: rgba(250, 204, 21, 0.18);
+  box-shadow: inset 4px 0 0 rgba(250, 204, 21, 0.9);
+}
+tr.qualify-2 {
+  background: rgba(59, 130, 246, 0.10);
+  box-shadow: inset 4px 0 0 rgba(59, 130, 246, 0.75);
+}
+tr.qualify-3 {
+  background: rgba(34, 197, 94, 0.10);
+  box-shadow: inset 4px 0 0 rgba(34, 197, 94, 0.75);
+}
+tr.qualify-4 {
+  background: rgba(168, 85, 247, 0.10);
+  box-shadow: inset 4px 0 0 rgba(168, 85, 247, 0.75);
+}
+
+/* ========== 淘汰赛对阵图（色块卡片式） ========== */
+
+#knockoutSection { position: relative; overflow: hidden; }
+
+.bracket { position: relative; z-index: 1; }
+
+/* 主容器：三列布局 */
+.bracket {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+/* 左侧/右侧半区 */
+.bracket-half {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 中间决赛区（垂直排列决赛+季军） */
+.bracket-center-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+/* 轮次垂直排列 */
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+/* 轮次标题 */
+.round-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+/* 比赛卡片 */
+.match-card {
+  border-radius: 12px;
+  overflow: hidden;
+  width: 200px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.match-card:hover {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.14);
+}
+
+/* 卡片标题条 */
+.match-card .match-title {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  text-align: center;
+}
+
+/* QF 卡片：蓝灰 */
+.match-card.match-qf .match-title {
+  background: linear-gradient(135deg, #334155, #475569);
+}
+
+/* SF 卡片：紫色 */
+.match-card.match-sf .match-title {
+  background: linear-gradient(135deg, #6d28d9, #7c3aed);
+}
+
+/* 季军赛卡片：橙色 */
+.match-card.match-third .match-title {
+  background: linear-gradient(135deg, #c2410c, #ea580c);
+}
+
+/* 决赛卡片：金色 */
+.match-card.match-final .match-title {
+  background: linear-gradient(135deg, #b45309, #d97706);
+  font-size: 13px;
+  padding: 7px 10px;
+}
+
+/* 队伍行 */
+.ko-team-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 1px dashed #e2e8f0;
+  min-height: 38px;
+}
+
+.ko-team-row:first-of-type { border-top: none; }
+
+/* 队伍色块背景 */
+.ko-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.ko-seed {
+  font-size: 10px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 2px 5px;
+  border-radius: 4px;
+  min-width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ko-team-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  flex: 1;
+}
+
+.ko-score {
+  font-size: 16px;
+  font-weight: 900;
+  color: #0f172a;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* 胜者高亮 */
+.ko-team-row.ko-winner .ko-team-name { color: #1d4ed8; font-weight: 800; }
+.ko-team-row.ko-winner .ko-seed { background: #dbeafe; color: #1d4ed8; }
+.ko-team-row.ko-winner { background: rgba(219, 234, 254, 0.5); }
+
+/* 比赛卡片状态 */
+.match-card.ko-ready {
+  border-left: 3px solid #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+.match-card.ko-done {
+  opacity: 0.88;
+}
+
+/* 队伍得分的色块 */
+.ko-score-box {
+  background: #fef9c3;
+  border: 1px solid #fde047;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* 冠军行 */
+.ko-champion-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-top: 2px solid #f59e0b;
+  margin-top: 4px;
+}
+
+.ko-champion-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ko-champion-name {
+  font-size: 15px;
+  font-weight: 900;
+  color: #78350f;
+}
+
+/* 季军行 */
+.ko-third-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #ffedd5, #fed7aa);
+  border-top: 2px solid #fb923c;
+  margin-top: 4px;
+}
+
+/* 点球显示 */
+.ko-penalty-score {
+  font-size: 11px;
+  color: #dc2626;
+  font-weight: 700;
+  background: #fee2e2;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+/* ========== 淘汰赛比分录入 ========== */
+.ko-input-row {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+.ko-label {
+  font-weight: 800;
+  color: #1e40af;
+  font-size: 13px;
+  min-width: 48px;
+}
+
+.ko-date {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.ko-teams {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #334155;
+  flex: 1;
+}
+
+.ko-teams .vs {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.ko-penalty {
+  width: 56px;
+}
+
+/* ========== 统计区 Tab 切换 ========== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+  box-shadow: none;
+}
+
+.tab-btn:hover {
+  color: #1d4ed8;
+  transform: none;
+}
+
+.tab-btn.active {
+  color: #1d4ed8;
+  border-bottom-color: #2563eb;
+}
+
+.tab-panel { display: block; }
+.tab-panel.hidden { display: none; }
+
+/* ========== 响应式 ========== */
+@media (max-width: 980px) {
+  .bracket {
+    grid-template-columns: 1fr;
+  }
+  .match-card { width: 100%; max-width: 280px; }
+}
+
+.notice-textarea {
+  width: 100%;
+  margin: 8px 0;
+  resize: vertical;
+}
+
+.parse-result {
+  min-height: 20px;
+  font-size: 14px;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.admin-panel {
+  margin-top: 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f8fafc;
+}
+
+.admin-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #334155;
+}
+
+.admin-login-form {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.hint {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.form-label {
+  align-self: center;
+  font-size: 14px;
+  color: #475569;
+}
+
+.file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+}
+
+input, select, button {
+  padding: 7px 10px;
+  border: 1px solid #c6d4ec;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+}
+
+button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+button.secondary {
+  background: linear-gradient(135deg, #64748b, #475569);
+}
+
+button.danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28);
+}
+
+.tag-played {
+  color: #166534;
+  font-weight: 700;
+}
+
+.tag-pending {
+  color: #b45309;
+  font-weight: 700;
+}
+
+/* ========== Suspension / Warning ========== */
+tr.row-suspended {
+  background: #fef2f2 !important;
+}
+tr.row-suspended td {
+  color: #dc2626;
+  font-weight: 700;
+}
+tr.row-warning {
+  background: #fffbeb !important;
+}
+tr.row-warning td {
+  color: #d97706;
+}
+
+/* ========== Season Bar ========== */
+.season-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 1240px;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dbe5f4;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.season-bar select {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+/* ========== Import Zone ========== */
+.import-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.import-zone:hover,
+.import-zone.drag-over {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+/* ========== Config Section ========== */
+#seasonConfigSection textarea {
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* ========== Match Media Gallery ========== */
+.media-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.media-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.media-card:hover {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+
+.media-card img,
+.media-card video {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  background: #f1f5f9;
+}
+
+.media-card video {
+  cursor: pointer;
+}
+
+.media-card-body {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.media-card-desc {
+  font-size: 13px;
+  color: #475569;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-card-date {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.media-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.media-delete-btn:hover {
+  background: #fef2f2;
+  opacity: 1;
+  transform: none;
+}
+
+.media-upload-area {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+.media-upload-area h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+#mediaFileInput {
+  padding: 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* Lightbox overlay */
+.media-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.media-lightbox img,
+.media-lightbox video {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.media-lightbox video {
+  min-width: 320px;
+}
+
+/* ========== Media Queries ========== */
+@media (max-width: 1000px) {
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .header-brand {
+    align-items: flex-start;
+  }
+
+  .site-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .leaderboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .match-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,71 @@
+/* draw.css — 线上抽签页面样式 */
+
+.draw-container { max-width: 800px; }
+
+.draw-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.draw-group h2 {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.draw-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.draw-slot {
+  padding: 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  background: #f8fafc;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+  color: #0f172a;
+}
+
+.draw-slot.animating {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  animation: slotPulse 0.25s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+.draw-slot.revealed {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  animation: slotReveal 0.5s ease-out;
+}
+
+.draw-slot.empty {
+  color: #94a3b8;
+  font-size: 28px;
+}
+
+@keyframes slotPulse {
+  from { transform: scale(1); border-color: #3b82f6; }
+  to { transform: scale(1.04); border-color: #8b5cf6; }
+}
+
+@keyframes slotReveal {
+  0% { transform: scale(1.2); opacity: 0.3; }
+  60% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .draw-groups { grid-template-columns: 1fr; }
+  .draw-slot { font-size: 17px; padding: 12px 16px; min-height: 46px; }
+}

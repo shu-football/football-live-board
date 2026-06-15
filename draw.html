@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>线上抽签 - 足球赛事</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./draw.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-brand">
+      <h1>线上抽签仪式</h1>
+    </div>
+    <p>输入参赛球队名称，点击开始抽签，随机分配至 A/B 组</p>
+  </header>
+
+  <main class="container draw-container">
+    <section class="card">
+      <h2>参赛球队</h2>
+      <p class="hint">每行输入一个球队名称，总计至少 4 支球队。奇数时 A 组多一队。</p>
+      <textarea id="drawTeamInput" rows="8" style="width:100%;" placeholder="材料&#10;计算机&#10;机自&#10;力工&#10;中欧&#10;延长&#10;悉商&#10;未来技术"></textarea>
+      <div class="form-row" style="margin-top:10px;">
+        <button id="startDrawBtn">开始抽签</button>
+        <button id="resetDrawBtn" class="secondary">重置</button>
+      </div>
+      <div id="drawStatus" class="parse-result"></div>
+    </section>
+
+    <section class="card" id="drawDisplaySection">
+      <div class="draw-groups">
+        <div class="draw-group" id="drawGroupA">
+          <h2>A 组</h2>
+          <div class="draw-slots" id="slotsA"></div>
+        </div>
+        <div class="draw-group" id="drawGroupB">
+          <h2>B 组</h2>
+          <div class="draw-slots" id="slotsB"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="drawResultSection" style="display:none;">
+      <h2>抽签结果</h2>
+      <div class="leaderboard-grid">
+        <div>
+          <h3>A 组</h3>
+          <ol id="resultGroupA" style="padding-left:18px;font-size:15px;line-height:2;"></ol>
+        </div>
+        <div>
+          <h3>B 组</h3>
+          <ol id="resultGroupB" style="padding-left:18px;font-size:15px;line-height:2;"></ol>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:10px;">
+        <button id="exportResultBtn">复制结果到剪贴板</button>
+        <button id="redrawBtn" class="secondary">重新抽签</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./schedule-utils.js"></script>
+  <script src="./draw.js"></script>
+</body>
+</html>

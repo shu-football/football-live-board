@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>足球赛事实时积分榜</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-brand">
+      <img src="./assets/sufa-logo.png" alt="上海大学足球协会 Logo" class="site-logo" />
+      <h1>足球比赛实时积分榜 + 射手榜 + 赛事预告</h1>
+    </div>
+    <p>支持手动录入比分、自动计算排名，后续可扩展淘汰赛。</p>
+  </header>
+
+  <div class="season-bar">
+    <label>赛季：</label>
+    <select id="seasonSelector"></select>
+    <button id="addSeasonBtn" class="secondary admin-only">+ 添加赛季</button>
+    <button id="deleteSeasonBtn" class="danger admin-only" style="margin-left:auto;">删除当前赛季</button>
+  </div>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-title-row">
+        <h2>数据状态</h2>
+        <span id="modeBadge" class="badge">只读浏览模式</span>
+      </div>
+      <p id="backendStatus">后端状态：未配置 Supabase，当前使用本地数据。</p>
+      <details class="admin-panel">
+        <summary>管理员入口（点击展开）</summary>
+        <form id="adminLoginForm" class="form-row admin-login-form">
+          <input id="adminEmail" type="email" placeholder="管理员邮箱" />
+          <input id="adminPassword" type="password" placeholder="管理员密码" />
+          <button type="submit">管理员登录</button>
+          <button id="adminLogoutBtn" type="button" class="secondary">退出登录</button>
+        </form>
+        <div class="admin-only">
+          <h3>密码管理</h3>
+          <form id="changePasswordForm" class="form-row">
+            <input id="newPasswordInput" type="password" placeholder="新密码（至少6位）" />
+            <button type="submit">修改当前账号密码</button>
+          </form>
+          <form id="resetPasswordForm" class="form-row">
+            <input id="resetEmailInput" type="email" placeholder="重置密码邮箱（留空默认当前登录邮箱）" />
+            <button type="submit" class="secondary">发送重置密码邮件</button>
+          </form>
+          <div id="passwordManageResult" class="parse-result"></div>
+        </div>
+        <div class="admin-only">
+          <h3>管理员管理</h3>
+          <form id="adminManageForm" class="form-row">
+            <input id="newAdminEmail" type="email" placeholder="新增管理员邮箱" />
+            <select id="newAdminRole">
+              <option value="admin">管理员（全部权限）</option>
+              <option value="media_editor">媒体编辑（仅上传图片/视频）</option>
+            </select>
+            <button type="submit">添加管理员</button>
+          </form>
+          <table id="adminUsersTable" class="data-table">
+            <thead>
+              <tr>
+                <th>邮箱</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="adminManageResult" class="parse-result"></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="card admin-only" id="seasonConfigSection">
+      <div class="card-title-row">
+        <h2>赛季配置</h2>
+        <button id="resetSeasonBtn" class="danger">重置赛季数据</button>
+      </div>
+      <p class="hint">分别输入 A/B 组球队（每行一个队名），然后生成赛程。仅管理员可操作。生成赛程会覆盖当前赛季比分数据。</p>
+      <div class="leaderboard-grid">
+        <div>
+          <label style="font-weight:600;">A 组球队：</label>
+          <textarea id="teamNamesInputA" rows="7" style="width:100%;margin-top:4px;" placeholder="材料&#10;计算机&#10;机自&#10;..."></textarea>
+        </div>
+        <div>
+          <label style="font-weight:600;">B 组球队：</label>
+          <textarea id="teamNamesInputB" rows="7" style="width:100%;margin-top:4px;" placeholder="未来技术&#10;管外生&#10;文法体&#10;..."></textarea>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:10px;">
+        <label>小组赛开始日期：<input id="groupStartDate" type="date" /></label>
+        <button id="generateScheduleBtn">生成赛程</button>
+      </div>
+      <div id="seasonConfigResult" class="parse-result"></div>
+    </section>
+
+    <section class="card" id="playerPoolSection">
+      <div class="card-title-row">
+        <h2>球员库</h2>
+        <button id="clearPlayersBtn" class="danger admin-only">清空球员库</button>
+      </div>
+      <p class="hint admin-only">支持 Excel 拖拽导入、粘贴表格文本或手动逐条添加。球员库按赛季隔离。</p>
+      <div class="import-zone admin-only" id="excelDropZone">
+        <span>拖拽 Excel 文件 (.xlsx / .xls) 到此处，或 <label class="file-label" style="cursor:pointer;">点击选择文件<input id="excelFileInput" type="file" accept=".xlsx,.xls" hidden /></label></span>
+      </div>
+      <details class="admin-only" style="margin-top:8px;">
+        <summary>粘贴表格文本导入</summary>
+        <textarea id="pastePlayersInput" rows="6" style="width:100%;margin-top:6px;" placeholder="粘贴表格内容（姓名&#9;号码&#9;球队，每行一条）"></textarea>
+        <button id="parsePastePlayersBtn" type="button" style="margin-top:6px;">解析并导入</button>
+      </details>
+      <form id="playerForm" class="form-row admin-only" style="margin-top:10px;">
+        <input id="newPlayerName" type="text" placeholder="球员姓名" required />
+        <input id="newPlayerNumber" type="number" min="0" max="99" placeholder="号码" />
+        <select id="newPlayerTeam" required><option value="">选择队伍</option></select>
+        <button type="submit">添加球员</button>
+      </form>
+      <div class="admin-only">
+        <table id="playersTable" class="data-table">
+          <thead>
+            <tr><th>姓名</th><th>号码</th><th>球队</th><th>操作</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint" style="color:#94a3b8;">管理员登录后可查看和管理球员库。</p>
+      <div id="playerPoolResult" class="parse-result"></div>
+    </section>
+
+    <section class="card stats-section">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="standings">积分榜</button>
+        <button class="tab-btn" data-tab="scorers">射手榜</button>
+        <button class="tab-btn" data-tab="cards">红黄牌榜</button>
+      </div>
+      <div id="panel-standings" class="tab-panel">
+        <div class="card-title-row">
+          <h2>积分榜</h2>
+          <div style="display:flex;gap:8px;">
+            <button id="exportStandingsBtn" class="secondary">导出为图片</button>
+            <button id="resetResultsBtn" class="danger admin-only">清空所有比分</button>
+          </div>
+        </div>
+        <div class="leaderboard-grid">
+          <div>
+            <h3>A组</h3>
+            <table id="tableA" class="data-table">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>队伍</th>
+                  <th>场次</th>
+                  <th>胜</th>
+                  <th>平</th>
+                  <th>负</th>
+                  <th>进球</th>
+                  <th>失球</th>
+                  <th>净胜球</th>
+                  <th>积分</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h3>B组</h3>
+            <table id="tableB" class="data-table">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>队伍</th>
+                  <th>场次</th>
+                  <th>胜</th>
+                  <th>平</th>
+                  <th>负</th>
+                  <th>进球</th>
+                  <th>失球</th>
+                  <th>净胜球</th>
+                  <th>积分</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="panel-scorers" class="tab-panel hidden">
+        <div class="card-title-row">
+          <h2>射手榜</h2>
+          <div style="display:flex;gap:8px;">
+            <button id="exportScorersBtn" class="secondary">导出为图片</button>
+            <button id="clearScorersBtn" class="danger admin-only">清空射手榜</button>
+          </div>
+        </div>
+        <p class="hint admin-only">管理员登录后：表格每行右侧有「删除」；也可用下方按姓名删除。</p>
+        <form id="scorerForm" class="form-row admin-only">
+          <select id="playerTeam" required><option value="">选择队伍</option></select>
+          <input id="playerName" type="text" list="playerNameSuggestions" placeholder="球员名（选队后可下拉）" required />
+          <datalist id="playerNameSuggestions"></datalist>
+          <input id="playerGoals" type="number" min="1" placeholder="进球数" required />
+          <button type="submit">添加/累计</button>
+        </form>
+        <form id="quickDeleteScorerForm" class="form-row admin-only">
+          <span class="form-label">按姓名删除一条：</span>
+          <select id="quickDeleteScorerTeam" required><option value="">选择队伍</option></select>
+          <input id="quickDeleteScorerName" type="text" list="quickDeleteScorerSuggestions" placeholder="球员姓名" required />
+          <datalist id="quickDeleteScorerSuggestions"></datalist>
+          <button type="submit" class="danger">删除该球员记录</button>
+        </form>
+        <table id="scorersTable" class="data-table">
+          <thead>
+            <tr>
+              <th>排名</th>
+              <th>球员</th>
+              <th>队伍</th>
+              <th>进球</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="panel-cards" class="tab-panel hidden">
+        <div class="card-title-row">
+          <h2>红黄牌榜</h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="exportCardsBtn" class="secondary">导出为图片</button>
+            <label style="font-size:13px;white-space:nowrap;">黄牌停赛阈值：<input id="yellowThresholdInput" type="number" min="1" max="5" value="2" style="width:50px;" /></label>
+            <button id="clearCardsBtn" class="danger admin-only">清空红黄牌榜</button>
+          </div>
+        </div>
+        <p class="hint admin-only">管理员登录后：表格每行右侧有「删除」；也可用下方按姓名删除。修改阈值后自动保存。半决赛前点"清零黄牌"：未达阈值的清零，已达阈值的保留（继续停赛）。</p>
+        <div class="form-row admin-only">
+          <button id="resetYellowCardsBtn" class="secondary">清零黄牌（半决赛前，未达阈值才清零）</button>
+        </div>
+        <form id="cardForm" class="form-row admin-only">
+          <select id="cardPlayerTeam" required><option value="">选择队伍</option></select>
+          <input id="cardPlayerName" type="text" list="cardPlayerNameSuggestions" placeholder="球员名（选队后可下拉）" required />
+          <datalist id="cardPlayerNameSuggestions"></datalist>
+          <select id="cardType" required>
+            <option value="">牌类型</option>
+            <option value="yellow">黄牌</option>
+            <option value="red">红牌</option>
+          </select>
+          <input id="cardCount" type="number" min="1" placeholder="张数" required />
+          <button type="submit">添加/累计</button>
+        </form>
+        <form id="quickDeleteCardForm" class="form-row admin-only">
+          <span class="form-label">按姓名删除一条：</span>
+          <select id="quickDeleteCardTeam" required><option value="">选择队伍</option></select>
+          <input id="quickDeleteCardName" type="text" list="quickDeleteCardSuggestions" placeholder="球员姓名" required />
+          <datalist id="quickDeleteCardSuggestions"></datalist>
+          <button type="submit" class="danger">删除该球员记录</button>
+        </form>
+        <table id="cardsTable" class="data-table">
+          <thead>
+            <tr>
+              <th>排名</th>
+              <th>球员</th>
+              <th>队伍</th>
+              <th>黄牌</th>
+              <th>红牌</th>
+              <th>总计</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="knockoutSection">
+      <div class="card-title-row">
+        <h2>淘汰赛对阵图</h2>
+        <button id="exportKnockoutBtn" class="secondary">导出为图片</button>
+      </div>
+      <p class="hint">A/B 组前四晋级。对阵规则：左半区 A1 vs B4、A3 vs B2；右半区 B1 vs A4、B3 vs A2。小组赛未结束时先显示 A1/B4 等占位，结束后按积分榜自动填入队名。点球比分显示在括号内。</p>
+      <svg id="knockoutSvg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+      <div class="bracket">
+        <div class="bracket-half bracket-left">
+          <div class="bracket-round">
+            <div class="round-title">8进4</div>
+            <div class="match-card match-qf qf1">
+              <div class="match-title">QF1</div>
+              <div class="ko-team-row" id="qf1-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF1Home">A1</span><span class="ko-team-name" id="teamA1">—</span></div>
+                <span class="ko-score" id="scoreQF1Home">—</span>
+              </div>
+              <div class="ko-team-row" id="qf1-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF1Away">B4</span><span class="ko-team-name" id="teamB4">—</span></div>
+                <span class="ko-score" id="scoreQF1Away">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="bracket-round">
+            <div class="round-title">4进2</div>
+            <div class="match-card match-sf sf1">
+              <div class="match-title">SF1</div>
+              <div class="ko-team-row" id="sf1-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedSF1Home">QF1胜</span><span class="ko-team-name" id="teamSF1A">—</span></div>
+                <span class="ko-score" id="scoreSF1Home">—</span>
+              </div>
+              <div class="ko-team-row" id="sf1-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedSF1Away">QF2胜</span><span class="ko-team-name" id="teamSF1B">—</span></div>
+                <span class="ko-score" id="scoreSF1Away">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="bracket-round">
+            <div class="round-title">8进4</div>
+            <div class="match-card match-qf qf2">
+              <div class="match-title">QF2</div>
+              <div class="ko-team-row" id="qf2-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF2Home">A3</span><span class="ko-team-name" id="teamA3">—</span></div>
+                <span class="ko-score" id="scoreQF2Home">—</span>
+              </div>
+              <div class="ko-team-row" id="qf2-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF2Away">B2</span><span class="ko-team-name" id="teamB2">—</span></div>
+                <span class="ko-score" id="scoreQF2Away">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bracket-center bracket-center-stacked">
+          <div class="bracket-round">
+            <div class="round-title">🏆 决赛</div>
+            <div class="match-card match-final" id="knockoutFinalCard">
+              <div class="match-title">🏆 决赛</div>
+              <div class="ko-team-row" id="final-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedFinalHome">SF1胜</span><span class="ko-team-name" id="teamFinalA">—</span></div>
+                <span class="ko-score" id="scoreFinalHome">—</span>
+              </div>
+              <div class="ko-team-row" id="final-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedFinalAway">SF2胜</span><span class="ko-team-name" id="teamFinalB">—</span></div>
+                <span class="ko-score" id="scoreFinalAway">—</span>
+              </div>
+              <div class="ko-champion-row">
+                <span class="ko-champion-label">🏆 冠军</span>
+                <span class="ko-champion-name" id="teamChampion">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="bracket-round">
+            <div class="round-title">🥉 季军赛</div>
+            <div class="match-card match-third">
+              <div class="match-title">🥉 季军赛</div>
+              <div class="ko-team-row" id="third-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedThirdHome">SF1败</span><span class="ko-team-name" id="teamThirdA">—</span></div>
+                <span class="ko-score" id="scoreThirdHome">—</span>
+              </div>
+              <div class="ko-team-row" id="third-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedThirdAway">SF2败</span><span class="ko-team-name" id="teamThirdB">—</span></div>
+                <span class="ko-score" id="scoreThirdAway">—</span>
+              </div>
+              <div class="ko-third-row">
+                <span class="ko-champion-label">🥉 季军</span>
+                <span class="ko-champion-name" id="teamThirdPlace">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bracket-half bracket-right">
+          <div class="bracket-round">
+            <div class="round-title">8进4</div>
+            <div class="match-card match-qf qf3">
+              <div class="match-title">QF3</div>
+              <div class="ko-team-row" id="qf3-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF3Home">B1</span><span class="ko-team-name" id="teamB1">—</span></div>
+                <span class="ko-score" id="scoreQF3Home">—</span>
+              </div>
+              <div class="ko-team-row" id="qf3-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF3Away">A4</span><span class="ko-team-name" id="teamA4">—</span></div>
+                <span class="ko-score" id="scoreQF3Away">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="bracket-round">
+            <div class="round-title">4进2</div>
+            <div class="match-card match-sf sf2">
+              <div class="match-title">SF2</div>
+              <div class="ko-team-row" id="sf2-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedSF2Home">QF3胜</span><span class="ko-team-name" id="teamSF2A">—</span></div>
+                <span class="ko-score" id="scoreSF2Home">—</span>
+              </div>
+              <div class="ko-team-row" id="sf2-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedSF2Away">QF4胜</span><span class="ko-team-name" id="teamSF2B">—</span></div>
+                <span class="ko-score" id="scoreSF2Away">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="bracket-round">
+            <div class="round-title">8进4</div>
+            <div class="match-card match-qf qf4">
+              <div class="match-title">QF4</div>
+              <div class="ko-team-row" id="qf4-home">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF4Home">B3</span><span class="ko-team-name" id="teamB3">—</span></div>
+                <span class="ko-score" id="scoreQF4Home">—</span>
+              </div>
+              <div class="ko-team-row" id="qf4-away">
+                <div class="ko-team-cell"><span class="ko-seed" id="seedQF4Away">A2</span><span class="ko-team-name" id="teamA2">—</span></div>
+                <span class="ko-score" id="scoreQF4Away">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title-row">
+        <h2>淘汰赛比分录入</h2>
+        <button id="resetKnockoutBtn" class="danger admin-only">清空淘汰赛比分</button>
+      </div>
+      <p>管理员登录后可录入淘汰赛比分。若有点球大战，请填写点球比分。</p>
+      <div id="knockoutInputList" class="match-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title-row">
+        <h2>比赛赛果（管理员可编辑）</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="summaryDate" style="width:130px;" />
+          <button id="generateSummaryBtn" class="secondary">生成赛果简报</button>
+        </div>
+      </div>
+      <p>观众只读。管理员登录后，可在此手动维护比分，或使用下方公告自动解析。</p>
+      <div id="matchInputList" class="match-list"></div>
+    </section>
+
+    <section class="card">
+      <h2>公告自动解析（以公告为准）</h2>
+      <p>仅管理员可用。把每日成绩公告整段粘贴后，点击“解析并覆盖更新”。若需对<strong>同一份公告</strong>再次解析（例如修正后重跑），请勾选下方「强制重新解析」。</p>
+      <textarea id="noticeInput" rows="10" class="notice-textarea admin-only" placeholder="粘贴公告原文..."></textarea>
+      <div class="form-row admin-only">
+        <label class="checkbox-label"><input type="checkbox" id="forceParseNotice" /> 强制重新解析（跳过与上次相同公告的拦截）</label>
+        <button id="parseNoticeBtn" type="button">解析并覆盖更新</button>
+      </div>
+      <div id="parseResult" class="parse-result"></div>
+    </section>
+
+    <section class="card">
+      <h2>数据备份与恢复（防误删）</h2>
+      <p>管理员可导出当前完整数据为 JSON 备份；误删后可从文件恢复，或从云端重新读取。</p>
+      <div class="form-row admin-only">
+        <button id="exportBackupBtn" type="button">导出备份 JSON</button>
+        <label class="file-label">
+          选择备份文件恢复
+          <input id="importBackupInput" type="file" accept="application/json" />
+        </label>
+        <button id="reloadCloudBtn" type="button" class="secondary">从云端重新读取</button>
+      </div>
+      <div id="backupResult" class="parse-result"></div>
+    </section>
+
+    <section class="card" id="matchMediaSection">
+      <div class="card-title-row">
+        <h2>今日比赛精彩瞬间</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="mediaDateFilter" style="width:130px;" />
+        </div>
+      </div>
+      <p class="hint" id="mediaEmptyHint" style="display:none;">暂无上传的图片或视频。</p>
+      <div class="media-gallery" id="matchMediaGallery"></div>
+      <div class="media-upload-area media-editor-only" style="margin-top:16px;">
+        <h3>上传图片/视频</h3>
+        <p class="hint">仅管理员可用。支持图片 (jpg/png/webp) 和视频 (mp4/webm/avi)。</p>
+        <form id="mediaUploadForm" class="form-row">
+          <input type="date" id="mediaUploadDate" />
+          <input type="file" id="mediaFileInput" accept="image/*,video/*" />
+          <input type="text" id="mediaDescription" placeholder="描述（可选）" style="flex:1;min-width:180px;" maxlength="200" />
+          <button type="submit">上传</button>
+        </form>
+        <div id="mediaUploadResult" class="parse-result" style="margin-top:6px;"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>接下来赛事预告（未开赛）</h2>
+      <table id="upcomingTable" class="data-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>轮次</th>
+            <th>组别</th>
+            <th>对阵</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./schedule-utils.js"></script>
+  <script src="./player-pool.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
