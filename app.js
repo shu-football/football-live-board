@@ -24,8 +24,8 @@ function migrateV3toV4() {
 
 // 1) 在 Supabase 项目 -> Settings -> API 里复制
 // 2) 前端只放 anon key，不要放 service_role key
-const SUPABASE_URL = "https://hepgkjftqqgztyzukgjk.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_o4MJy5JKLkWtIMX61OEWqg_Dp-zJ0Vb";
+const SUPABASE_URL = "https://ptazgpifirvgadacirxe.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_EEcva3sroZE2Nd_5irNJUA_b6QLCdPI";
 const ADMIN_EMAILS = ["w2564139064@163.com"]; // fallback for local mode
 
 const TEAM_ALIASES = {
